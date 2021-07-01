@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
 
-ISO_SOURCE="/opt/openEuler/openEuler-20.03-LTS-SP1-x86_64-dvd.iso"
-ISO_OUTPUT="$(dirname $(readlink -f "$0"))/suseEuler-1.1-LTS-x86_64-dvd.iso"
+CUR_DIR=$(dirname $(readlink -f "$0"))
+ISO_SOURCE=/opt/openEuler/openEuler-20.03-LTS-SP1-x86_64-dvd.iso
+ISO_OUTPUT=${CUR_DIR}/suseEuler-1.1-LTS-x86_64-dvd.iso
 ISO_VOLID="suseEuler-1.1-LTS-x86_64"
 
-ROOTFS_DIR=$(dirname $(readlink -f "$0"))/rootfs
-BOOTLOADER_DIR=$(dirname $(readlink -f "$0"))/bootloader
+ROOTFS_DIR=${CUR_DIR}/rootfs
+BOOTLOADER_DIR=${CUR_DIR}/bootloader
 
 function clean() {
     #rm -rf /mnt/cdrom/* /mnt/openEuler_file/* /mnt/install_img/* /mnt/rootfs_img/*
@@ -65,7 +66,10 @@ function generate() {
     mkisofs -R -J -T -r -l -d -joliet-long -allow-multidot -allow-leading-dots -no-bak -V ${ISO_VOLID} -o ${FINAL_ISO_OUTPUT} -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -eltorito-boot images/efiboot.img -no-emul-boot ./
     popd
 
-    [ -x "$(command -v implantisomd5)" ] && echo "Trying implantisomd5 ISO ..." && implantisomd5 ${FINAL_ISO_OUTPUT}
+    pushd ${CUR_DIR}
+    [ -x "$(command -v implantisomd5)" ] && echo "Trying implantisomd5 ISO ..." && implantisomd5 $(basename ${ISO_OUTPUT})
+    [ -x "$(command -v sha256sum)" ] && echo "Trying to create sha256sum file ..." && sha256sum $(basename ${ISO_OUTPUT}) > $(basename ${ISO_OUTPUT}).sha256sum
+    popd
 
     echo "Please check the output ISO: ${FINAL_ISO_OUTPUT}"
     echo "Done..."
