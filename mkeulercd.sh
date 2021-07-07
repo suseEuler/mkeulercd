@@ -2,15 +2,19 @@
 set -e
 
 CUR_DIR=$(dirname $(readlink -f "$0"))
-ISO_SOURCE=/opt/openEuler/openEuler-20.03-LTS-SP1-x86_64-dvd.iso
-ISO_OUTPUT=${CUR_DIR}/suseEuler-1.1-LTS-x86_64-dvd.iso
-ISO_VOLID="suseEuler-1.1-LTS-x86_64"
+ARCH_ROOTFS_DIR=
+ARCH_BOOTLOADER_DIR=
+COMMON_ROOTFS_DIR=
 
-ROOTFS_DIR=${CUR_DIR}/rootfs
-BOOTLOADER_DIR=${CUR_DIR}/bootloader
+ISO_ARCH=
+ISO_SOURCE=
+ISO_OUTPUT=
+ISO_VOLID=
+
+ACTION=
 
 function clean() {
-    #rm -rf /mnt/cdrom/* /mnt/openEuler_file/* /mnt/install_img/* /mnt/rootfs_img/*
+    rm -rf /mnt/cdrom /mnt/openEuler_file /mnt/install_img /mnt/rootfs_img
     losetup -d /dev/loop0 /dev/loop1 || true
     umount /dev/loop0 /dev/loop1 || true
 }
@@ -41,12 +45,13 @@ function prepare() {
 }
 
 function replace() {
-    echo "Replacing installer rootfs with ${ROOTFS_DIR} ..."
-    cp -r ${ROOTFS_DIR}/* /mnt/rootfs_img
-    cp ${ROOTFS_DIR}/.buildstamp /mnt/rootfs_img
+    echo "Replacing installer rootfs with ${ARCH_ROOTFS_DIR} and ${COMMON_ROOTFS_DIR} ..."
+    #cp -r ${ARCH_ROOTFS_DIR}/* /mnt/rootfs_img
+    cp ${ARCH_ROOTFS_DIR}/.buildstamp /mnt/rootfs_img
+    cp -r ${COMMON_ROOTFS_DIR}/* /mnt/rootfs_img
 
-    echo "Replacing installer bootloader with ${BOOTLOADER_DIR} ..."
-    cp -r ${BOOTLOADER_DIR}/* /mnt/openEuler_file
+    echo "Replacing installer bootloader with ${ARCH_BOOTLOADER_DIR} ..."
+    cp -r ${ARCH_BOOTLOADER_DIR}/* /mnt/openEuler_file
 
     echo "Done..."
 }
@@ -63,7 +68,18 @@ function generate() {
     local FINAL_ISO_OUTPUT=$(dirname $(readlink -f ${ISO_OUTPUT}))/$(basename ${ISO_OUTPUT})
     echo "Generating ISO ${FINAL_ISO_OUTPUT} by ISO_VOLID ${ISO_VOLID} ..."
     pushd /mnt/openEuler_file
-    mkisofs -R -J -T -r -l -d -joliet-long -allow-multidot -allow-leading-dots -no-bak -V ${ISO_VOLID} -o ${FINAL_ISO_OUTPUT} -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -eltorito-boot images/efiboot.img -no-emul-boot ./
+    if [[ ISO_ARCH = "x86_64" ]]; then
+        mkisofs -R -J -T -r -l -d -joliet-long -allow-multidot -allow-leading-dots -no-bak \
+            -V ${ISO_VOLID} -o ${FINAL_ISO_OUTPUT} \
+            -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot \
+            -boot-load-size 4 -boot-info-table \
+            -eltorito-alt-boot -eltorito-boot images/efiboot.img -no-emul-boot ./
+    else
+        mkisofs -R -J -T -r -l -d -joliet-long -allow-multidot -allow-leading-dots -no-bak \
+            -V ${ISO_VOLID} -o ${FINAL_ISO_OUTPUT} \
+            -boot-load-size 4 -boot-info-table \
+            -eltorito-platform efi -eltorito-boot images/efiboot.img -eltorito-catalog boot.catalog -no-emul-boot ./
+    fi
     popd
 
     pushd ${CUR_DIR}
@@ -75,24 +91,16 @@ function generate() {
     echo "Done..."
 }
 
+function default() {
+    prepare
+    replace
+    generate
+}
+
 until [ "$#" = "0" ] ; do
     case "$1" in
-        default)
-            prepare
-            replace
-            generate
-            shift
-            ;;
-        prepare)
-            prepare
-            shift
-            ;;
-        replace)
-            replace
-            shift
-            ;;
-        generate)
-            generate
+        default | prepare | replace | generate | clean)
+            ACTION=$1
             shift
             ;;
         -i)
@@ -107,18 +115,23 @@ until [ "$#" = "0" ] ; do
             ISO_VOLID=$2
             shift 2
             ;;
+        -arch)
+            ISO_ARCH=$2
+            shift 2
+            ;;
         -h|--help|-v|--version)
             cat <<EOF
 ${0##*/} can create a custom openEuler installation ISOs by modifying an existing ISO
 these options are recognized:
-    prepare                to prepare the workdir with ${ISO_SOURCE}
-    replace                to replace the custom files with ${ROOTFS_DIR} and ${BOOTLOADER_DIR}
-    generate               to generate an ISO to ${ISO_OUTPUT}
+    prepare                to prepare the workdir with ISO_SOURCE
+    replace                to replace the custom files with ROOTFS_DIR and BOOTLOADER_DIR
+    generate               to generate an ISO to ISO_OUTPUT
     default                to run prepare, replace and generate actions
     clean                  to clean the workdir
-    -i ISO_SOURCE          use this source ISO instead of default ${ISO_SOURCE}
-    -o ISO_OUTPUT          use this output ISO instead of default ${ISO_OUTPUT}
-    -volid ISO_VOLID       use this ISO volid instead of default ${ISO_VOLID}
+    -i ISO_SOURCE          use this source ISO instead of default value
+    -o ISO_OUTPUT          use this output ISO instead of default value
+    -volid ISO_VOLID       use this ISO volid instead of default value
+    -arch ISO_ARCH         x86_64(default) or aarch64
 EOF
             exit 1
             ;;
@@ -128,3 +141,14 @@ EOF
              ;;
     esac
 done
+
+ISO_ARCH=${ISO_ARCH:-"x86_64"}
+ISO_SOURCE=${ISO_SOURCE:-"/opt/openEuler/openEuler-20.03-LTS-SP1-${ISO_ARCH}-dvd.iso"}
+ISO_OUTPUT=${ISO_OUTPUT:-"${CUR_DIR}/suseEuler-1.1-LTS-${ISO_ARCH}-dvd.iso"}
+ISO_VOLID=${ISO_VOLID:-"suseEuler-1.1-LTS-${ISO_ARCH}"}
+
+ARCH_ROOTFS_DIR=${CUR_DIR}/${ISO_ARCH}/rootfs
+ARCH_BOOTLOADER_DIR=${CUR_DIR}/${ISO_ARCH}/bootloader
+COMMON_ROOTFS_DIR=${CUR_DIR}/common/rootfs
+
+$ACTION
