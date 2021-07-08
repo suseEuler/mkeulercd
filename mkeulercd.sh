@@ -14,9 +14,9 @@ ISO_VOLID=
 ACTION=
 
 function clean() {
-    rm -rf /mnt/cdrom /mnt/openEuler_file /mnt/install_img /mnt/rootfs_img
     losetup -d /dev/loop0 /dev/loop1 || true
     umount /dev/loop0 /dev/loop1 || true
+    rm -rf /mnt/cdrom /mnt/openEuler_file /mnt/install_img /mnt/rootfs_img
 }
 
 function prepare() {
@@ -52,6 +52,7 @@ function replace() {
 
     echo "Replacing installer bootloader with ${ARCH_BOOTLOADER_DIR} ..."
     cp -r ${ARCH_BOOTLOADER_DIR}/* /mnt/openEuler_file
+    chmod 444 /mnt/openEuler_file/EFI/BOOT/grub.cfg
 
     echo "Done..."
 }
@@ -77,8 +78,7 @@ function generate() {
     else
         mkisofs -R -J -T -r -l -d -joliet-long -allow-multidot -allow-leading-dots -no-bak \
             -V ${ISO_VOLID} -o ${FINAL_ISO_OUTPUT} \
-            -boot-load-size 4 -boot-info-table \
-            -eltorito-platform efi -eltorito-boot images/efiboot.img -eltorito-catalog boot.catalog -no-emul-boot ./
+            -eltorito-boot images/efiboot.img -no-emul-boot ./
     fi
     popd
 
