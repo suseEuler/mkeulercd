@@ -28,6 +28,10 @@ function prepare() {
         # https://gitee.com/src-openeuler/anaconda/issues/I2E172
         cp /mnt/cdrom/.discinfo /mnt/openEuler_file/
     fi
+    if [[ ! -e /mnt/openEuler_file/.treeinfo ]]; then
+        cp -r /mnt/cdrom/* /mnt/openEuler_file/
+        cp /mnt/cdrom/.treeinfo /mnt/openEuler_file/
+    fi
     if [[ ! -e /mnt/install_img/install.img ]]; then
         cp -r /mnt/openEuler_file/images/install.img /mnt/install_img
     fi

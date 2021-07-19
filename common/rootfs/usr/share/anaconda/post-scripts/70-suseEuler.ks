@@ -17,7 +17,7 @@ fi
 popd
 
 # update /etc/os-release
-cp /etc/os-release $ANA_INSTALL_PATH/etc/os-release
+# cp /etc/os-release $ANA_INSTALL_PATH/etc/os-release
 
 # update /etc/openEuler-release
 
