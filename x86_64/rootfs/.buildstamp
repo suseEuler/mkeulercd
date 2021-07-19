@@ -1,9 +1,9 @@
 [Main]
 Product=suseEuler
-Version=1.1-LTS
+Version=1.2-LTS
 BugURL=your distribution provided bug reporting tool
 IsFinal=True
-UUID=202012221827.x86_64
+UUID=202106240524.x86_64
 Variant=Server
 [Compose]
 Lorax=33.6-1

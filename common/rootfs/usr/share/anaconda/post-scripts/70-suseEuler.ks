@@ -7,12 +7,12 @@ pushd $ANA_INSTALL_PATH
 if [ -e ./boot/efi/EFI/openEuler/grub.cfg ]; then
     echo "Update ./boot/efi/EFI/openEuler/grub.cfg ..."
     sed -i 's/openEuler/suseEuler/g' ./boot/efi/EFI/openEuler/grub.cfg
-    sed -i 's/20.03 (LTS-SP1)/1.1 (LTS)/g' ./boot/efi/EFI/openEuler/grub.cfg
+    sed -i 's/20.03 (LTS-SP2)/1.2 (LTS)/g' ./boot/efi/EFI/openEuler/grub.cfg
 fi
 if [ -e ./boot/grub2/grub.cfg ]; then
     echo "Update ./boot/grub2/grub.cfg ..."
     sed -i 's/openEuler/suseEuler/g' ./boot/grub2/grub.cfg
-    sed -i 's/20.03 (LTS-SP1)/1.1 (LTS)/g' ./boot/grub2/grub.cfg
+    sed -i 's/20.03 (LTS-SP2)/1.2 (LTS)/g' ./boot/grub2/grub.cfg
 fi
 popd
 

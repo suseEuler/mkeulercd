@@ -1,6 +1,6 @@
 [Main]
 Product=suseEuler
-Version=1.1-LTS
+Version=1.2-LTS
 BugURL=your distribution provided bug reporting tool
 IsFinal=True
 UUID=202012222340.aarch64

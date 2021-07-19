@@ -143,9 +143,9 @@ EOF
 done
 
 ISO_ARCH=${ISO_ARCH:-"x86_64"}
-ISO_SOURCE=${ISO_SOURCE:-"/opt/openEuler/openEuler-20.03-LTS-SP1-${ISO_ARCH}-dvd.iso"}
-ISO_OUTPUT=${ISO_OUTPUT:-"${CUR_DIR}/suseEuler-1.1-LTS-${ISO_ARCH}-dvd.iso"}
-ISO_VOLID=${ISO_VOLID:-"suseEuler-1.1-LTS-${ISO_ARCH}"}
+ISO_SOURCE=${ISO_SOURCE:-"/opt/openEuler/openEuler-20.03-LTS-SP2-${ISO_ARCH}-dvd.iso"}
+ISO_OUTPUT=${ISO_OUTPUT:-"${CUR_DIR}/suseEuler-1.2-LTS-${ISO_ARCH}-dvd.iso"}
+ISO_VOLID=${ISO_VOLID:-"suseEuler-1.2-LTS-${ISO_ARCH}"}
 
 ARCH_ROOTFS_DIR=${CUR_DIR}/${ISO_ARCH}/rootfs
 ARCH_BOOTLOADER_DIR=${CUR_DIR}/${ISO_ARCH}/bootloader
