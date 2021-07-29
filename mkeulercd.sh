@@ -73,13 +73,15 @@ function generate() {
     local FINAL_ISO_OUTPUT=$(dirname $(readlink -f ${ISO_OUTPUT}))/$(basename ${ISO_OUTPUT})
     echo "Generating ISO ${FINAL_ISO_OUTPUT} by ISO_VOLID ${ISO_VOLID} ..."
     pushd /mnt/openEuler_file
-    if [[ ISO_ARCH = "x86_64" ]]; then
+    if [[ $ISO_ARCH == "x86_64" ]]; then
+        echo "Building the x86_64 ISO"
         mkisofs -R -J -T -r -l -d -joliet-long -allow-multidot -allow-leading-dots -no-bak \
             -V ${ISO_VOLID} -o ${FINAL_ISO_OUTPUT} \
             -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot \
             -boot-load-size 4 -boot-info-table \
             -eltorito-alt-boot -eltorito-boot images/efiboot.img -no-emul-boot ./
     else
+        echo "Building the aarch64 ISO"
         mkisofs -R -J -T -r -l -d -joliet-long -allow-multidot -allow-leading-dots -no-bak \
             -V ${ISO_VOLID} -o ${FINAL_ISO_OUTPUT} \
             -eltorito-boot images/efiboot.img -no-emul-boot ./
